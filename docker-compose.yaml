@@ -15,8 +15,6 @@ services:
     volumes:
       - ./scripts/gateway.sql:/docker-entrypoint-initdb.d/init.sql
     command:
-      --default-authentication-plugin=mysql_native_password
-      --skip-password-validation
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_general_ci
     restart: on-failure
