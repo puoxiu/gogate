@@ -18,7 +18,7 @@ import (
 
 type AdminLoginController struct{}
 
-func AdminLoginRegister(group *gin.RouterGroup) {
+func AdminLoginRegisterFunc(group *gin.RouterGroup) {
 	adminLogin := &AdminLoginController{}
 	group.POST("/login", adminLogin.AdminLogin)
 	// group.GET("/logout", adminLogin.AdminLoginOut)

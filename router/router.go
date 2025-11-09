@@ -24,8 +24,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 
-	// 注册业务路由
-	adminLoginGroup := router.Group("/admin_login")
+	// 设置session 存储 redis
 	store, err := redis.NewStore(
 		10,                                  // 1. 连接池大小
 		"tcp",                               // 2. 网络类型
@@ -41,6 +40,8 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		Path:   "/",
 	})
 
+	// 注册业务路由
+	adminLoginGroup := router.Group("/admin_login")
 	adminLoginGroup.Use(
 		sessions.Sessions("mysession", store),	// // "mysession" 是客户端 Cookie 键名
 		middleware.RecoveryMiddleware(),
@@ -48,7 +49,20 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		middleware.TranslationMiddleware(),
 	)
 	{
-		controller.AdminLoginRegister(adminLoginGroup)
+		controller.AdminLoginRegisterFunc(adminLoginGroup)
+	}
+
+	// 注册 admin 路由
+	adminGroup := router.Group("/admin")
+	adminGroup.Use(
+		sessions.Sessions("mysession", store),
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.SessionAuthMiddleware(),
+		middleware.TranslationMiddleware(),
+	)
+	{
+		controller.AdminRegisterFunc(adminGroup)
 	}
 
 
