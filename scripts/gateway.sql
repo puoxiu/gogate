@@ -74,7 +74,7 @@ CREATE TABLE `gateway_service_access_control` (
   `black_list` varchar(1000) NOT NULL DEFAULT '' COMMENT '黑名单ip',
   `white_list` varchar(1000) NOT NULL DEFAULT '' COMMENT '白名单ip',
   `white_host_name` varchar(1000) NOT NULL DEFAULT '' COMMENT '白名单主机',
-  `clientip_flow_limit` int(11) NOT NULL DEFAULT '0' COMMENT '客户端ip限流',
+  `clientip_flow_limit` int(11) NOT NULL DEFAULT '0' COMMENT '客户端ip限流',
   `service_flow_limit` int(20) NOT NULL DEFAULT '0' COMMENT '服务端限流'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='网关权限控制表';
 
@@ -229,7 +229,7 @@ CREATE TABLE `gateway_service_load_balance` (
   `check_interval` int(11) NOT NULL DEFAULT '0' COMMENT '检查间隔, 单位s',
   `round_type` tinyint(4) NOT NULL DEFAULT '2' COMMENT '轮询方式 0=random 1=round-robin 2=weight_round-robin 3=ip_hash',
   `ip_list` varchar(2000) NOT NULL DEFAULT '' COMMENT 'ip列表',
-  `weight_list` varchar(2000) NOT NULL DEFAULT '' COMMENT '权重列表',
+  `weight_list` varchar(2000) NOT NULL DEFAULT '' COMMENT '权重列表',
   `forbid_list` varchar(2000) NOT NULL DEFAULT '' COMMENT '禁用ip列表',
   `upstream_connect_timeout` int(11) NOT NULL DEFAULT '0' COMMENT '建立连接超时, 单位s',
   `upstream_header_timeout` int(11) NOT NULL DEFAULT '0' COMMENT '获取header超时, 单位s',
