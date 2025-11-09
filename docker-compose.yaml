@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # MySQL 服务
+  mysql:
+    image: mysql:8.0
+    container_name: gogate_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: gogate
+      MYSQL_ROOT_HOST: '%'
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./scripts/gateway.sql:/docker-entrypoint-initdb.d/init.sql
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --skip-password-validation
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+    restart: on-failure
+    networks:
+      - go_gateway_network
+
+  # Redis 服务
+  redis:
+    image:  redis:7-alpine
+    container_name: gogate_redis
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly no  # 关闭持久化（开发环境无需保存数据）
+    restart: on-failure
+    networks:
+      - go_gateway_network
+
+# 自定义网络，避免端口冲突
+networks:
+  go_gateway_network:
+    driver: bridge
