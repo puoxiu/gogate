@@ -10,7 +10,7 @@ import (
 
 type RedisFlowCountService struct {
 	AppID       string
-	Interval    time.Duration
+	Interval    time.Duration		// 统计间隔：定时持久化到Redis、计算QPS的周期（如1秒、5秒）
 	QPS         int64
 	Unix        int64
 	TickerCount int64
@@ -24,6 +24,8 @@ func NewRedisFlowCountService(appID string, interval time.Duration) *RedisFlowCo
 		QPS:      0,
 		Unix:     0,
 	}
+
+	// 启动后台goroutine：定时执行持久化和QPS计算（核心异步任务）
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
@@ -33,8 +35,8 @@ func NewRedisFlowCountService(appID string, interval time.Duration) *RedisFlowCo
 		ticker := time.NewTicker(interval)
 		for {
 			<-ticker.C
-			tickerCount := atomic.LoadInt64(&reqCounter.TickerCount) //获取数据
-			atomic.StoreInt64(&reqCounter.TickerCount, 0)            //重置数据
+			tickerCount := atomic.LoadInt64(&reqCounter.TickerCount) //原子读取当前周期的请求数（TickerCount），并重置为0
+			atomic.StoreInt64(&reqCounter.TickerCount, 0)
 
 			currentTime := time.Now()
 			dayKey := reqCounter.GetDayKey(currentTime)
@@ -48,7 +50,7 @@ func NewRedisFlowCountService(appID string, interval time.Duration) *RedisFlowCo
 				fmt.Println("RedisConfPipline err",err)
 				continue
 			}
-
+			// 从Redis读取当日总请求数（用于计算QPS）
 			totalCount, err := reqCounter.GetDayData(currentTime)
 			if err != nil {
 				fmt.Println("reqCounter.GetDayData err",err)
