@@ -4,6 +4,9 @@ SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
+SET NAMES utf8mb4;
+SET CHARACTER_SET_CLIENT = utf8mb4;
+SET CHARACTER_SET_RESULTS = utf8mb4;
 
 -- --------------------------------------------------------
 -- 数据库: `gogate`
@@ -24,7 +27,7 @@ CREATE TABLE `gateway_admin` (
   `create_at` datetime NOT NULL DEFAULT '1971-01-01 00:00:00' COMMENT '新增时间',
   `update_at` datetime NOT NULL DEFAULT '1971-01-01 00:00:00' COMMENT '更新时间',
   `is_delete` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='管理员表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员表';
 
 --
 -- 转存表中的数据 `gateway_admin`
@@ -49,7 +52,7 @@ CREATE TABLE `gateway_app` (
   `create_at` datetime NOT NULL COMMENT '添加时间',
   `update_at` datetime NOT NULL COMMENT '更新时间',
   `is_delete` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 1=删除'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='网关租户表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='网关租户表';
 
 --
 -- 转存表中的数据 `gateway_app` 
@@ -76,7 +79,7 @@ CREATE TABLE `gateway_service_access_control` (
   `white_host_name` varchar(1000) NOT NULL DEFAULT '' COMMENT '白名单主机',
   `clientip_flow_limit` int(11) NOT NULL DEFAULT '0' COMMENT '客户端ip限流',
   `service_flow_limit` int(20) NOT NULL DEFAULT '0' COMMENT '服务端限流'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='网关权限控制表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='网关权限控制表';
 
 --
 -- 转存表中的数据 `gateway_service_access_control`
@@ -120,7 +123,7 @@ CREATE TABLE `gateway_service_grpc_rule` (
   `service_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '服务id',
   `port` int(5) NOT NULL DEFAULT '0' COMMENT '端口',
   `header_transfor` varchar(5000) NOT NULL DEFAULT '' COMMENT 'header转换支持增加(add)、删除(del)、修改(edit) 格式: add headname headvalue 多个逗号间隔'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='网关路由匹配表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='网关路由匹配表';
 
 --
 -- 转存表中的数据 `gateway_service_grpc_rule`
@@ -147,7 +150,7 @@ CREATE TABLE `gateway_service_http_rule` (
   `need_websocket` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否支持websocket 1=支持',
   `url_rewrite` varchar(5000) NOT NULL DEFAULT '' COMMENT 'url重写功能 格式：^/gatekeeper/test_service(.*) $1 多个逗号间隔',
   `header_transfor` varchar(5000) NOT NULL DEFAULT '' COMMENT 'header转换支持增加(add)、删除(del)、修改(edit) 格式: add headname headvalue 多个逗号间隔'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='网关路由匹配表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='网关路由匹配表';
 
 --
 -- 转存表中的数据 `gateway_service_http_rule`
@@ -182,7 +185,7 @@ CREATE TABLE `gateway_service_info` (
   `create_at` datetime NOT NULL DEFAULT '1971-01-01 00:00:00' COMMENT '添加时间',
   `update_at` datetime NOT NULL DEFAULT '1971-01-01 00:00:00' COMMENT '更新时间',
   `is_delete` tinyint(4) DEFAULT '0' COMMENT '是否删除 1=删除'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='网关基本信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='网关基本信息表';
 
 --
 -- 转存表中的数据 `gateway_service_info`
@@ -235,7 +238,7 @@ CREATE TABLE `gateway_service_load_balance` (
   `upstream_header_timeout` int(11) NOT NULL DEFAULT '0' COMMENT '获取header超时, 单位s',
   `upstream_idle_timeout` int(10) NOT NULL DEFAULT '0' COMMENT '链接最大空闲时间, 单位s',
   `upstream_max_idle` int(11) NOT NULL DEFAULT '0' COMMENT '最大空闲链接数'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='网关负载表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='网关负载表';
 
 --
 -- 转存表中的数据 `gateway_service_load_balance`
@@ -278,7 +281,7 @@ CREATE TABLE `gateway_service_tcp_rule` (
   `id` bigint(20) NOT NULL COMMENT '自增主键',
   `service_id` bigint(20) NOT NULL COMMENT '服务id',
   `port` int(5) NOT NULL DEFAULT '0' COMMENT '端口号'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='网关路由匹配表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='网关路由匹配表';
 
 --
 -- 转存表中的数据 `gateway_service_tcp_rule`
@@ -394,6 +397,4 @@ ALTER TABLE `gateway_service_load_balance`
 ALTER TABLE `gateway_service_tcp_rule`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键', AUTO_INCREMENT=182;COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+

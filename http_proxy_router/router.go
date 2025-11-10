@@ -1,8 +1,8 @@
 package httpproxyrouter
 
 import (
-
 	"github.com/gin-gonic/gin"
+	"github.com/puoxiu/gogate/http_proxy_middleware"
 )
 
 
@@ -14,6 +14,10 @@ func InitHttpProxyRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 			"message": "pong hahah",
 		})
 	})
+
+	router.Use(
+		http_proxy_middleware.HTTPAccessModeMiddleware(),
+	)
 
 	return router
 }
