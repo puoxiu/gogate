@@ -43,6 +43,7 @@ func (r *RoundRobinBalance) SetConf(conf LoadBalanceConf) {
 	r.conf = conf
 }
 
+// Update 更新轮询负载均衡器的配置 ----- 观察者得到通知后要触发的动作 
 func (r *RoundRobinBalance) Update() {
 	//if conf, ok := r.conf.(*LoadBalanceZkConf); ok {
 	//	fmt.Println("Update get zk conf:", conf.GetConf())

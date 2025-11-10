@@ -9,7 +9,7 @@ import (
 
 type RandomBalance struct {
 	curIndex int
-	rss      []string
+	rss      []string		// 负载均衡器的节点列表
 	//观察主体
 	conf LoadBalanceConf
 }
@@ -39,14 +39,8 @@ func (r *RandomBalance) SetConf(conf LoadBalanceConf) {
 	r.conf = conf
 }
 
+// Update 更新随机负载均衡器的配置 ----- 观察者得到通知后要触发的动作 
 func (r *RandomBalance) Update() {
-	//if conf, ok := r.conf.(*LoadBalanceZkConf); ok {
-	//	fmt.Println("Update get zk conf:", conf.GetConf())
-	//	r.rss = []string{}
-	//	for _, ip := range conf.GetConf() {
-	//		r.Add(strings.Split(ip, ",")...)
-	//	}
-	//}
 	if conf, ok := r.conf.(*LoadBalanceCheckConf); ok {
 		fmt.Println("Update get check conf:", conf.GetConf())
 		r.rss = nil

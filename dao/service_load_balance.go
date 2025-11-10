@@ -81,8 +81,10 @@ func init() {
 	LoadBalancerHandler = NewLoadBalancer()
 }
 
+// GetLoadBalancer 根据服务详情获取负载均衡器
 func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.LoadBalance, error) {
 	for _, lbrItem := range lbr.LoadBanlanceSlice {
+		// 如果负载均衡器已经存在，直接返回
 		if lbrItem.ServiceName == service.Info.ServiceName {
 			return lbrItem.LoadBanlance, nil
 		}
@@ -94,6 +96,7 @@ func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.L
 	if service.Info.LoadType==public.LoadTypeTCP || service.Info.LoadType==public.LoadTypeGRPC{
 		schema = ""
 	}
+	// 从服务详情中获取后端服务节点的IP列表和权重列表
 	ipList := service.LoadBalance.GetIPListByModel()
 	weightList := service.LoadBalance.GetWeightListByModel()
 	ipConf := map[string]string{}
@@ -101,6 +104,7 @@ func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.L
 		ipConf[ipItem] = weightList[ipIndex]
 	}
 	//fmt.Println("ipConf", ipConf)
+	// ipConf 示例：map["127.0.0.1:8080"]="10", ["127.0.0.1:8081"]="20"
 	mConf, err := load_balance.NewLoadBalanceCheckConf(fmt.Sprintf("%s%s", schema, "%s"), ipConf)
 	if err != nil {
 		return nil, err

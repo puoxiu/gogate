@@ -15,24 +15,30 @@ const (
 	DefaultCheckMaxErrNum = 2
 	DefaultCheckInterval  = 5
 )
-
+// LoadBalanceCheckConf 负载均衡检查配置---作为被观察者
 type LoadBalanceCheckConf struct {
-	observers    []Observer
-	confIpWeight map[string]string
-	activeList   []string
-	format       string
+	observers    []Observer			// 各种负载均衡器--作为观察者
+	confIpWeight map[string]string	// 配置的IP权重
+	activeList   []string			// 活动的IP列表
+	format       string				// 配置格式
 }
 
-func (s *LoadBalanceCheckConf) Attach(o Observer) {
+// AddListObserver 添加一个负载均衡器--作为观察者
+func (s *LoadBalanceCheckConf) AddListObserver(o Observer) {
 	s.observers = append(s.observers, o)
 }
 
-func (s *LoadBalanceCheckConf) NotifyAllObservers() {
+// Notify 通知所有负载均衡器--更新配置
+func (s *LoadBalanceCheckConf) Notify(conf []string) {
+	//fmt.Println("Notify", conf)
+	//更新配置时，通知监听者也更新
+	s.activeList = conf
 	for _, obs := range s.observers {
 		obs.Update()
 	}
 }
 
+// GetConf 获取当前的负载均衡检查配置
 func (s *LoadBalanceCheckConf) GetConf() []string {
 	confList := []string{}
 	for _, ip := range s.activeList {
@@ -45,13 +51,14 @@ func (s *LoadBalanceCheckConf) GetConf() []string {
 	return confList
 }
 
-//更新配置时，通知监听者也更新
+// WatchConf 监控配置，当配置发生变化时，通知所有负载均衡器--更新配置
 func (s *LoadBalanceCheckConf) WatchConf() {
 	//fmt.Println("watchConf")
 	go func() {
 		confIpErrNum := map[string]int{}
 		for {
 			changedList := []string{}
+			// // 遍历所有节点，通过TCP连接测试是否可用
 			for item, _ := range s.confIpWeight {
 				conn, err := net.DialTimeout("tcp", item, time.Duration(DefaultCheckTimeout)*time.Second)
 				//todo http statuscode
@@ -62,35 +69,24 @@ func (s *LoadBalanceCheckConf) WatchConf() {
 					}
 				}
 				if err != nil {
-					if _, ok := confIpErrNum[item]; ok {
-						confIpErrNum[item] += 1
-					} else {
-						confIpErrNum[item] = 1
-					}
+					confIpErrNum[item]++
 				}
 				if confIpErrNum[item] < DefaultCheckMaxErrNum {
 					changedList = append(changedList, item)
 				}
 			}
+			// 对比：本次健康列表和上次的 activeList 是否不一样？不一样则更新
 			sort.Strings(changedList)
 			sort.Strings(s.activeList)
 			if !reflect.DeepEqual(changedList, s.activeList) {
-				s.UpdateConf(changedList)
+				s.Notify(changedList)
 			}
 			time.Sleep(time.Duration(DefaultCheckInterval) * time.Second)
 		}
 	}()
 }
 
-//更新配置时，通知监听者也更新
-func (s *LoadBalanceCheckConf) UpdateConf(conf []string) {
-	//fmt.Println("UpdateConf", conf)
-	s.activeList = conf
-	for _, obs := range s.observers {
-		obs.Update()
-	}
-}
-
+// NewLoadBalanceCheckConf 创建一个新的负载均衡检查配置
 func NewLoadBalanceCheckConf(format string, conf map[string]string) (*LoadBalanceCheckConf, error) {
 	aList := []string{}
 	//默认初始化
