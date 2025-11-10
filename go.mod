@@ -13,6 +13,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/pkg/errors v0.9.1
+	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
 	gorm.io/gorm v1.25.3
 )
 
