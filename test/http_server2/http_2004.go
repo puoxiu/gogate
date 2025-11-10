@@ -13,7 +13,7 @@ func main() {
 	})
 	// 任意路径都返回（适配网关可能的路径剥离）
 	router.NoRoute(func(c *gin.Context) {
-		c.String(http.StatusOK, "Hello from 2004 port! Path: %s", c.Param("any"))
+		c.String(http.StatusOK, "Hello from 2004 port! Path: %s", c.Request.URL.Path)
 	})
 	// 监听 2004 端口
 	router.Run(":2004")
