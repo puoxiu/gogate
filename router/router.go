@@ -8,8 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/puoxiu/gogate/controller"
 	"github.com/puoxiu/gogate/middleware"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
 )
 
 
@@ -21,7 +19,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 			"message": "pong hahah",
 		})
 	})
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 
 	// 设置session 存储 redis
@@ -44,8 +41,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	adminLoginGroup := router.Group("/admin_login")
 	adminLoginGroup.Use(
 		sessions.Sessions("mysession", store),	// // "mysession" 是客户端 Cookie 键名
-		middleware.RecoveryMiddleware(),
-		middleware.RequestLog(),
 		middleware.TranslationMiddleware(),
 	)
 	{
@@ -56,8 +51,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	adminGroup := router.Group("/admin")
 	adminGroup.Use(
 		sessions.Sessions("mysession", store),
-		middleware.RecoveryMiddleware(),
-		middleware.RequestLog(),
 		middleware.SessionAuthMiddleware(),
 		middleware.TranslationMiddleware(),
 	)
@@ -69,8 +62,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	serviceRouter := router.Group("/service")
 	serviceRouter.Use(
 		sessions.Sessions("mysession", store),
-		middleware.RecoveryMiddleware(),
-		middleware.RequestLog(),
 		middleware.SessionAuthMiddleware(),
 		middleware.TranslationMiddleware())
 	{
@@ -81,8 +72,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	appRouter := router.Group("/app")
 	appRouter.Use(
 		sessions.Sessions("mysession", store),
-		middleware.RecoveryMiddleware(),
-		middleware.RequestLog(),
 		middleware.SessionAuthMiddleware(),
 		middleware.TranslationMiddleware())
 	{

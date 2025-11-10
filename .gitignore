@@ -3,8 +3,11 @@ vscode/
 
 nodes/
 demo/
-logs/
 images/
 
 
+logs/
+cert_file/
 
+
+data/

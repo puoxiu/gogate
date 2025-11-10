@@ -2,11 +2,13 @@ package router
 
 import (
 	"context"
-	"github.com/e421083458/golang_common/lib"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/e421083458/golang_common/lib"
+	"github.com/gin-gonic/gin"
+	"github.com/puoxiu/gogate/middleware"
 )
 
 var (
@@ -15,7 +17,11 @@ var (
 
 func HttpServerRun() {
 	gin.SetMode(lib.ConfBase.DebugMode)
-	r := InitRouter()
+	r := InitRouter(
+		// 全局中间件
+		middleware.RequestLog(),
+		middleware.RecoveryMiddleware(),
+	)
 	HttpSrvHandler = &http.Server{
 		Addr:           lib.GetStringConf("base.http.addr"),
 		Handler:        r,
