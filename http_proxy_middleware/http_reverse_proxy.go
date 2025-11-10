@@ -26,16 +26,14 @@ func HTTPReverseProxyMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		// 得到传输器
 		trans, err := dao.TransportorHandler.GetTrans(serviceDetail)
 		if err != nil {
 			middleware.ResponseError(c, 2003, err)
 			c.Abort()
 			return
 		}
-		//middleware.ResponseSuccess(c,"ok")
-		//return
-		//创建 reverseproxy
-		//使用 reverseproxy.ServerHTTP(c.Request,c.Response)
 		proxy := reverse_proxy.NewLoadBalanceReverseProxy(c, lb, trans)
 		proxy.ServeHTTP(c.Writer, c.Request)
 		c.Abort()

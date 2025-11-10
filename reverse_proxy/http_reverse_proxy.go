@@ -1,6 +1,7 @@
 package reverse_proxy
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -17,6 +18,7 @@ func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, tra
 		// 1. 通过负载均衡器获取下一个后端服务地址（基于负载策略，如轮询、权重等）
 		nextAddr, err := lb.Get(req.URL.String())
 		//todo 优化点3
+		fmt.Println("负载均衡选择的后端服务地址:", nextAddr)
 		if err != nil || nextAddr=="" {
 			panic("get next addr fail")
 		}
@@ -84,7 +86,7 @@ func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, tra
 	}
 
 	// 反向代理实例：Director用于修改客户端请求，ModifyResponse用于修改响应，ErrorHandler用于处理错误
-	return &httputil.ReverseProxy{Director: director, ModifyResponse: modifyFunc, ErrorHandler: errFunc}
+	return &httputil.ReverseProxy{Director: director, ModifyResponse: modifyFunc, ErrorHandler: errFunc, Transport: trans}
 }
 
 func singleJoiningSlash(a, b string) string {

@@ -149,6 +149,7 @@ func init() {
 	TransportorHandler = NewTransportor()
 }
 
+// GetTrans 根据服务详情获取传输器
 func (t *Transportor) GetTrans(service *ServiceDetail) (*http.Transport, error) {
 	for _, transItem := range t.TransportSlice {
 		if transItem.ServiceName == service.Info.ServiceName {

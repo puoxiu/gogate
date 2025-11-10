@@ -14,6 +14,7 @@ func HTTPAccessModeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		service, err := dao.ServiceManagerHandler.HTTPAccessMode(c)
 		if err != nil {
+			log.Println("没有匹配到服务===")
 			middleware.ResponseError(c, 1001, err)
 			c.Abort()
 			return
