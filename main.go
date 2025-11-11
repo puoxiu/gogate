@@ -11,6 +11,7 @@ import (
 	"github.com/puoxiu/gogate/dao"
 	httpproxyrouter "github.com/puoxiu/gogate/http_proxy_router"
 	"github.com/puoxiu/gogate/router"
+	"github.com/puoxiu/gogate/tcp_proxy_router"
 )
 
 var (
@@ -72,6 +73,10 @@ func startServer() {
 	go func() {
 		httpproxyrouter.HttpsProxyServerRun()
 	}()
+
+	go func() {
+		tcp_proxy_router.TcpServerRun()
+	}()
 }
 
 func stop() {
@@ -81,6 +86,7 @@ func stop() {
 	case "server":
 		httpproxyrouter.HttpProxyServerStop()
 		httpproxyrouter.HttpsProxyServerStop()
+		tcp_proxy_router.TcpServerStop()
 	default:
 		flag.Usage()
 		os.Exit(1)
