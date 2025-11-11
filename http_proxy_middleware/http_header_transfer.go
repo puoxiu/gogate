@@ -1,7 +1,7 @@
 package http_proxy_middleware
 
 import (
-	"log"
+	// "log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -26,7 +26,7 @@ func HTTPHeaderTransferMiddleware() gin.HandlerFunc {
 		// 规则之间用逗号分隔，每个规则参数用空格分隔，每个规则的操作类型只能是add、edit、del
 		for _, item := range strings.Split(serviceDetail.HTTPRule.HeaderTransfor, ",") {
 			items := strings.Split(item, " ")
-			log.Println("修改请求头规则: ", item)
+			// log.Println("修改请求头规则: ", item)
 			if len(items) != 3 {
 				continue
 			}

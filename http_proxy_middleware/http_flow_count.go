@@ -1,9 +1,6 @@
 package http_proxy_middleware
 
 import (
-	"log"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/puoxiu/gogate/dao"
@@ -32,8 +29,8 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 			return
 		}
 		totalCounter.Increase()	// 次数增加1次
-		dayCount, _ := totalCounter.GetDayData(time.Now())
-		log.Printf("totalCounter qps:%v,dayCount:%v", totalCounter.QPS, dayCount)
+		// dayCount, _ := totalCounter.GetDayData(time.Now())
+		// log.Printf("totalCounter qps:%v,dayCount:%v", totalCounter.QPS, dayCount)
 
 		// 2服务流量统计 将本次请求增加到服务流量统计中
 		serviceCounter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)
@@ -45,8 +42,8 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 		serviceCounter.Increase()	// 次数增加1次
 
 
-		dayServiceCount, _ := serviceCounter.GetDayData(time.Now())
-		log.Printf("serviceCounter qps:%v,dayCount:%v", serviceCounter.QPS, dayServiceCount)
+		// dayServiceCount, _ := serviceCounter.GetDayData(time.Now())
+		// log.Printf("serviceCounter qps:%v,dayCount:%v", serviceCounter.QPS, dayServiceCount)
 		c.Next()
 	}
 }
