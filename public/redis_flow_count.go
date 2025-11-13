@@ -35,7 +35,7 @@ func NewRedisFlowCountService(appID string, interval time.Duration) *RedisFlowCo
 		ticker := time.NewTicker(interval)
 		for {
 			<-ticker.C
-			tickerCount := atomic.LoadInt64(&reqCounter.TickerCount) //原子读取当前周期的请求数（TickerCount），并重置为0
+			tickerCount := atomic.LoadInt64(&reqCounter.TickerCount) //原子读取当前周期的请求数: 先取出当前周期内请求数并重置
 			atomic.StoreInt64(&reqCounter.TickerCount, 0)
 
 			currentTime := time.Now()

@@ -20,7 +20,8 @@ func HTTPFlowLimitMiddleware() gin.HandlerFunc {
 			return
 		}
 		serviceDetail := serverInterface.(*dao.ServiceDetail)
-		// 配置中未设置限流，直接放行 设置了限流则检查是否超过限流
+
+		// 1.判断配置中是否设置服务限流
 		if serviceDetail.AccessControl.ServiceFlowLimit != 0 {
 			serviceLimiter, err := public.FlowLimiterHandler.GetLimiter(
 				public.FlowServicePrefix+serviceDetail.Info.ServiceName,
@@ -36,7 +37,7 @@ func HTTPFlowLimitMiddleware() gin.HandlerFunc {
 				return
 			}
 		}
-
+		// 2. 判断配置中是否设置客户端IP限流
 		if serviceDetail.AccessControl.ClientIPFlowLimit > 0 {
 			clientLimiter, err := public.FlowLimiterHandler.GetLimiter(
 				public.FlowServicePrefix+serviceDetail.Info.ServiceName+"_"+c.ClientIP(),

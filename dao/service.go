@@ -1,14 +1,16 @@
 package dao
 
 import (
-	"github.com/puoxiu/gogate/dto"
-	"github.com/puoxiu/gogate/public"
-	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
-	"github.com/e421083458/golang_common/lib"
+	"fmt"
 	"net/http/httptest"
 	"strings"
 	"sync"
+
+	"github.com/e421083458/golang_common/lib"
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
+	"github.com/puoxiu/gogate/dto"
+	"github.com/puoxiu/gogate/public"
 )
 
 type ServiceDetail struct {
@@ -107,7 +109,7 @@ func (s *ServiceManager) LoadOnce() error {
 			s.err = err
 			return
 		}
-		//  从数据库查询所有服务（分页参数设为最大，加载全部）
+		//  从数据库查询所有服务， 调用 PageList 方法（分页参数设为最大，加载全部）
 		params := &dto.ServiceListReq{PageNo: 1, PageSize: 99999}
 		list, _, err := serviceInfo.PageList(c, tx, params)
 		if err != nil {
@@ -128,6 +130,7 @@ func (s *ServiceManager) LoadOnce() error {
 			}
 			s.ServiceMap[listItem.ServiceName] = serviceDetail
 			s.ServiceSlice = append(s.ServiceSlice, serviceDetail)
+			fmt.Printf("===初始化，从DB加载所有服务===%v\n", serviceDetail.Info)
 		}
 	})
 	return s.err
