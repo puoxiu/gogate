@@ -128,7 +128,6 @@ var TransportorHandler *Transportor
 
 type Transportor struct {
 	TransportMap   map[string]*TransportItem
-	TransportSlice []*TransportItem
 	Locker         sync.RWMutex
 }
 
@@ -140,7 +139,6 @@ type TransportItem struct {
 func NewTransportor() *Transportor {
 	return &Transportor{
 		TransportMap:   map[string]*TransportItem{},
-		TransportSlice: []*TransportItem{},
 		Locker:         sync.RWMutex{},
 	}
 }
@@ -151,21 +149,22 @@ func init() {
 
 // GetTrans 根据服务详情获取传输器--高效：利用TCP连接池
 func (t *Transportor) GetTrans(service *ServiceDetail) (*http.Transport, error) {
-	for _, transItem := range t.TransportSlice {
-		// 如果该服务的传输器已经存在，直接返回
-		if transItem.ServiceName == service.Info.ServiceName {
-			return transItem.Trans, nil
-		}
+	name := service.Info.ServiceName
+
+	t.Locker.RLock()
+	if transItem, ok := t.TransportMap[name]; ok {
+		return transItem.Trans, nil
 	}
+	t.Locker.RUnlock()
 
 	if service.LoadBalance.UpstreamConnectTimeout==0{
 		service.LoadBalance.UpstreamConnectTimeout = 30
 	}
 	if service.LoadBalance.UpstreamMaxIdle==0{
-		service.LoadBalance.UpstreamMaxIdle = 100
+		service.LoadBalance.UpstreamMaxIdle = 500
 	}
 	if service.LoadBalance.UpstreamIdleTimeout==0{
-		service.LoadBalance.UpstreamIdleTimeout = 90
+		service.LoadBalance.UpstreamIdleTimeout = 10
 	}
 	if service.LoadBalance.UpstreamHeaderTimeout==0{
 		service.LoadBalance.UpstreamHeaderTimeout = 30
@@ -188,9 +187,13 @@ func (t *Transportor) GetTrans(service *ServiceDetail) (*http.Transport, error) 
 		Trans:       trans,
 		ServiceName: service.Info.ServiceName,
 	}
-	t.TransportSlice = append(t.TransportSlice, transItem)
 	t.Locker.Lock()
+	if _, ok := t.TransportMap[name]; ok {
+		t.Locker.Unlock()
+		return transItem.Trans, nil
+	}
 	defer t.Locker.Unlock()
+	
 	t.TransportMap[service.Info.ServiceName] = transItem
 	return trans, nil
 }

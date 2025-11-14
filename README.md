@@ -1,6 +1,17 @@
-# gogate 微服务网关
-> 
+# gogate 网关
+> gogate 是一个基于 Go 语言开发的轻量级微服务网关，提供 HTTP/HTTPS 代理、TCP 代理、服务治理、流量控制等核心能力，支持通过可视化后台进行配置管理
 
+
+## 核心功能
+* 多协议支持：HTTP/HTTPS 代理、TCP 代理
+* 服务治理：基于配置的服务路由、负载均衡
+* 流量统计：实时统计全站流量、单个服务流量、按天/小时流量
+* 流量控制：QPS/QPD 限流、IP 白名单
+* 可视化管理：内置 dashboard 管理后台，支持服务配置、租户管理
+* 高可用：基于 Redis 实现分布式会话和缓存
+
+## 技术架构
+Gin、Redis、MySQL、Gorm
 
 
 ## 流量统计的实现
@@ -32,12 +43,8 @@ type RedisFlowCountService struct {
 * 按小时统计： flow_hour_{YYYYMMDDHH}_{AppID}
 
 ### 本系统的流量统计功能：
-1. HTTP代理：
-    * 统计全站流量
-    * 统计单个服务流量
-
-2. TCP代理
-
+* 统计全站流量
+* 统计单个服务流量
 
 
 ## 限流实现
@@ -59,7 +66,9 @@ type RedisFlowCountService struct {
 * 观察者（Observer）： LoadBalance 实例
 
 配置中心运行协程：每隔一定时间（如5秒）进行节点存活检测，更新节点状态（健康/不健康）。
-如果存活列表有变化，则通知所有 LoadBalance 实例更新节点列表。进行更新
+如果存活列表有变化，则通知所有 LoadBalance 实例更新节点列表进行更新：
+![负载均衡器](docs/loadbalance.png)
+
 
 ###  负载均衡器抽象
 ```go
@@ -91,11 +100,8 @@ lb.Add("10.0.0.1:80", "0")		// 地址 & 权重
 
 
 ## 连接池
-
 每个服务（ServiceName）对应一个独立的 http.Transport 实例，用于维护到后端节点的 TCP 连接池
 同一服务的所有客户端请求共享同一套 TCP 连接池，极大减少建连（TCP+TLS）开销，显著提升 QPS
-
-
 ```go
 type Transportor struct {
 	TransportMap   map[string]*TransportItem
@@ -123,11 +129,64 @@ type TransportItem struct {
 ```
 
 
+## 压测环境
+* 压测工具：wrk
+* 压测机器： MacBook air M2， 8核16GB
+* 压测服务端： 本地部署的 gogate 网关 + 本地部署的 test_http_1 服务(仅进行字符串打印，开发端口：2003 2004)
 
+说明：
+由于机器限制，压测服务端仅部署在本地，压测客户端也在本地；
+网关与服务之间网络通信开销更小，不符合真实场景；
+所以压测结果仅代表本地环境的性能表现，不具有普遍性。
 
+## 压测结果
+在相同压测条件（30 线程、600 并发、30s）下，对比原服务与通过网关访问的性能差异如下：
+**吞吐量**
+* 原服务：184,109 req/s
+* 网关代理后：112,672 req/s
+* **吞吐量下降约 38.8%**
 
+**延迟**
+* 原服务：3.3ms
+* 网关代理后：39.7ms
+* **延迟增加约12倍**
 
+## 压测数据
+### 对原服务进行压力测试
+```bash
+(base) xing@xing-2 gogate % wrk -t30 -c600 -d30s --latency http://127.0.0.1:2003/test
+Running 30s test @ http://127.0.0.1:2003/test
+  30 threads and 600 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     3.30ms    1.80ms  69.96ms   94.37%
+    Req/Sec     6.17k   526.18    14.21k    89.21%
+  Latency Distribution
+     50%    3.13ms
+     75%    3.59ms
+     90%    4.11ms
+     99%    7.67ms
+  5533725 requests in 30.06s, 791.61MB read
+Requests/sec: 184109.72
+Transfer/sec:     26.34MB
+```
 
+### 经过网关层代理后的压力测试
+```bash
+(base) xing@xing-2 nginx % wrk -t30 -c600 -d30s --latency http://127.0.0.1:8080/test_http_1/test
+Running 30s test @ http://127.0.0.1:8080/test_http_1/test
+  30 threads and 600 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    42.47ms   66.43ms 886.17ms   84.39%
+    Req/Sec     3.83k     1.53k   11.99k    69.97%
+  Latency Distribution
+     50%    2.30ms
+     75%   67.33ms
+     90%  139.39ms
+     99%  282.98ms
+  3433934 requests in 30.04s, 785.72MB read
+Requests/sec: 114300.74
+Transfer/sec:     26.15MB
 
+```
 
 

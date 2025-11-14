@@ -17,9 +17,9 @@
 
 # 日志配置
 [log]
-    log_level = "error"         #日志打印最低级别
+    log_level = "error"         #日志打印级别
     [log.file_writer]           #文件写入配置
-        on = false
+        on = true
         log_path = "./logs/gogate.inf.log"
         rotate_log_path = "./logs/gogate.inf.log.%Y%M%D%H"
         wf_log_path = "./logs/gogate.wf.log"
