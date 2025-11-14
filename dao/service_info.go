@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -107,7 +106,6 @@ func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*S
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("查询到服务:", out)
 	return out, nil
 }
 

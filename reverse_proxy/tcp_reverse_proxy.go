@@ -63,6 +63,7 @@ func (dp *TcpReverseProxy) keepAlivePeriod() time.Duration {
 }
 
 //传入上游 conn，在这里完成下游连接与数据交换
+//  TCP 反向代理的核心处理方法
 func (dp *TcpReverseProxy) ServeTCP(ctx context.Context, src net.Conn) {
 	//设置连接超时
 	var cancel context.CancelFunc
@@ -78,7 +79,7 @@ func (dp *TcpReverseProxy) ServeTCP(ctx context.Context, src net.Conn) {
 		return
 	}
 
-	defer func() { go dst.Close() }() //记得退出下游连接
+	defer func() { go dst.Close() }() //退出下游连接
 
 	//设置dst的 keepAlive 参数,在数据请求之前
 	if ka := dp.keepAlivePeriod(); ka > 0 {
@@ -88,8 +89,10 @@ func (dp *TcpReverseProxy) ServeTCP(ctx context.Context, src net.Conn) {
 		}
 	}
 	errc := make(chan error, 1)
+	// 启动两个 goroutine 分别负责数据从 src 到 dst 和 dst 到 src 的复制
 	go dp.proxyCopy(errc, src, dst)
 	go dp.proxyCopy(errc, dst, src)
+	// 等待任意一个复制操作完成
 	<-errc
 }
 

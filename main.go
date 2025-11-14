@@ -29,6 +29,9 @@ func init() {
 
 // go run main.go -conf ./conf/dev/ -mode server
 // go run main.go -conf ./conf/dev/ -mode dashboard
+
+// go run main.go -conf ./conf/prod/ -mode server
+// go run main.go -conf ./conf/prod/ -mode dashboard
 func main()  {
 	fmt.Println("conf:", *conf)
 	lib.InitModule(*conf,[]string{"base","mysql","redis"})
@@ -50,8 +53,6 @@ func main()  {
 
 	stop()
 }
-
-
 
 // startDashboard 启动后台管理服务
 func startDashboard() {
@@ -91,5 +92,4 @@ func stop() {
 		flag.Usage()
 		os.Exit(1)
 	}
-	
 }

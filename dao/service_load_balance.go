@@ -149,15 +149,15 @@ func init() {
 	TransportorHandler = NewTransportor()
 }
 
-// GetTrans 根据服务详情获取传输器
+// GetTrans 根据服务详情获取传输器--高效：利用TCP连接池
 func (t *Transportor) GetTrans(service *ServiceDetail) (*http.Transport, error) {
 	for _, transItem := range t.TransportSlice {
+		// 如果该服务的传输器已经存在，直接返回
 		if transItem.ServiceName == service.Info.ServiceName {
 			return transItem.Trans, nil
 		}
 	}
 
-	//todo 优化点5
 	if service.LoadBalance.UpstreamConnectTimeout==0{
 		service.LoadBalance.UpstreamConnectTimeout = 30
 	}
@@ -184,7 +184,6 @@ func (t *Transportor) GetTrans(service *ServiceDetail) (*http.Transport, error) 
 		ResponseHeaderTimeout: time.Duration(service.LoadBalance.UpstreamHeaderTimeout)*time.Second,
 	}
 
-	//save to map and slice
 	transItem := &TransportItem{
 		Trans:       trans,
 		ServiceName: service.Info.ServiceName,

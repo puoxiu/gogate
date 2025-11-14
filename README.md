@@ -52,5 +52,82 @@ type RedisFlowCountService struct {
 
 
 
+## 负载均衡
+实现：轮询、加权轮询、IP哈希三种方式的负载均衡
+基于**观察者模式**：
+* 主题（Subject）：负载均衡配置中心
+* 观察者（Observer）： LoadBalance 实例
+
+配置中心运行协程：每隔一定时间（如5秒）进行节点存活检测，更新节点状态（健康/不健康）。
+如果存活列表有变化，则通知所有 LoadBalance 实例更新节点列表。进行更新
+
+###  负载均衡器抽象
+```go
+type LoadBalance interface {
+	Add(...string) error			// 添加节点addr
+	Get(string) (string, error)		// 根据key获取下一个节点addr
+
+	//后期服务发现补充
+	Update()
+}
+```
+参数举例：
+```go
+lb := NewRoundRobinBalance()
+lb.Add("10.0.0.1:80", "0")		// 地址 & 权重
+```
+
+1. 随机负载均衡器
+	* 即随机选择一个节点
+
+2. 轮询负载均衡器
+	* 即按顺序选择下一个节点，每次获取节点后，将索引+1，超过节点列表长度时，重新从0开始
+
+3. 加权轮询负载均衡器
+	* 即按权重比例选择下一个节点，权重越高，被选中的概率越大
+
+4. IP哈希负载均衡器
+	* 即根据客户端 IP 进行哈希计算，将相同 IP 的请求路由到相同的节点
+
+
+## 连接池
+
+每个服务（ServiceName）对应一个独立的 http.Transport 实例，用于维护到后端节点的 TCP 连接池
+同一服务的所有客户端请求共享同一套 TCP 连接池，极大减少建连（TCP+TLS）开销，显著提升 QPS
+
+
+```go
+type Transportor struct {
+	TransportMap   map[string]*TransportItem
+	TransportSlice []*TransportItem
+	Locker         sync.RWMutex
+}
+
+type TransportItem struct {
+	Trans       *http.Transport
+	ServiceName string
+}
+	trans := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout: time.Duration(service.LoadBalance.UpstreamConnectTimeout)*time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          service.LoadBalance.UpstreamMaxIdle,
+		IdleConnTimeout:       time.Duration(service.LoadBalance.UpstreamIdleTimeout)*time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ResponseHeaderTimeout: time.Duration(service.LoadBalance.UpstreamHeaderTimeout)*time.Second,
+	}
+```
+
+
+
+
+
+
+
+
 
 

@@ -45,14 +45,13 @@ func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, tra
 		}
 	}
 
-	// 可以对响应进行修改，例如添加自定义响应头、修改响应体等
+	// 在代理服务器收到后端服务的响应后、将响应返回给客户端之前，对响应进行自定义处理 todo: 有需要再添加
 	modifyFunc := func(resp *http.Response) error {
 		if strings.Contains(resp.Header.Get("Connection"), "Upgrade") {
 			// 如果响应头中包含 Connection: Upgrade 不做任何修改，避免破坏连接升级流程
 			return nil
 		}
 
-		//todo 优化点2
 		//var payload []byte
 		//var readErr error
 		//

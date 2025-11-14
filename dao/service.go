@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"net/http/httptest"
 	"strings"
 	"sync"
@@ -130,7 +129,6 @@ func (s *ServiceManager) LoadOnce() error {
 			}
 			s.ServiceMap[listItem.ServiceName] = serviceDetail
 			s.ServiceSlice = append(s.ServiceSlice, serviceDetail)
-			fmt.Printf("===初始化，从DB加载所有服务===%v\n", serviceDetail.Info)
 		}
 	})
 	return s.err
