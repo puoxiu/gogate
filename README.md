@@ -15,7 +15,6 @@ Gin、Redis、MySQL、Gorm
 
 
 ## 流量统计的实现
-### 实现技术栈
 > 通过 Redis + 原子计数 + 定时任务 实现了高性能的请求流量统计与实时 QPS（每秒请求数）计算
 核心结构：RedisFlowCountService
 ```go
@@ -32,17 +31,17 @@ type RedisFlowCountService struct {
 2. 定时任务：在每次定时周期结束时，原子读取`TickerCount`并重置，并计算当前周期内的QPS（`TickerCount / Interval`），更新到`QPS`字段。
 3. 总流量统计：原子增加`TotalCount`，记录所有请求的累计数量。
 
-### 实现要点总结
+要点总结:
 1. 使用 atomic 原子操作 保证并发安全
 2. 利用 Redis Pipeline 提升批量写入性能
 3. 定时器（time.Ticker）实现异步统计与QPS计算
 
-### key设计
+key设计:
 > 系统在 Redis 中维护两种维度的流量统计 key：按天 和 按小时
 * 按天统计： flow_day_{YYYYMMDD}_{AppID}
 * 按小时统计： flow_hour_{YYYYMMDDHH}_{AppID}
 
-### 本系统的流量统计功能：
+本系统的流量统计功能：
 * 统计全站流量
 * 统计单个服务流量
 
@@ -69,8 +68,7 @@ type RedisFlowCountService struct {
 如果存活列表有变化，则通知所有 LoadBalance 实例更新节点列表进行更新：
 ![负载均衡器](docs/loadbalance.png)
 
-
-###  负载均衡器抽象
+负载均衡器抽象:
 ```go
 type LoadBalance interface {
 	Add(...string) error			// 添加节点addr
@@ -127,7 +125,7 @@ type TransportItem struct {
 		ResponseHeaderTimeout: time.Duration(service.LoadBalance.UpstreamHeaderTimeout)*time.Second,
 	}
 ```
-
+<br>
 
 ## 压测环境
 * 压测工具：wrk
